@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kross Sentinel | {% if page == 'panel' %}Admin Panel{% elif page == 'login' %}Giriş{% elif page == 'register' %}Kayıt{% elif page == 'super_admin' %}Süper Admin{% elif page == 'waiting' %}Onay Bekleniyor{% else %}Ana Sayfa{% endif %}</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        
+        <!-- ==================== HEADER ==================== -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🛡️</span>
+                <h1>KROSS SENTINEL</h1>
+            </div>
+            <p class="subtitle">Profesyonel Yönetim Paneli</p>
+        </header>
+
+        <!-- ==================== ANA SAYFA ==================== -->
+        {% if page == 'home' %}
+        <div class="cards-grid">
+            <div class="card ticket-card" onclick="openModal('ticket-modal')">
+                <span class="card-icon">📩</span>
+                <h2>Destek Talebi</h2>
+                <p class="card-desc">Sorununuzu bildirin, yetkililerimiz ilgilensin.</p>
+                <button class="btn btn-green">📩 Talep Aç</button>
+            </div>
+
+            <div class="card apply-card" onclick="openModal('apply-modal')">
+                <span class="card-icon">📝</span>
+                <h2>Yetkili Başvurusu</h2>
+                <p class="card-desc">Ekibimize katılın, sunucumuzu birlikte yönetelim.</p>
+                <button class="btn btn-blue">📝 Başvur</button>
+            </div>
+
+            <div class="card permission-card" onclick="openModal('permission-modal')">
+                <span class="card-icon">🔴</span>
+                <h2>İzin Talebi</h2>
+                <p class="card-desc">Geçici süreliğine izin alın.</p>
+                <button class="btn btn-red">🔴 İzin Talep Et</button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-box">
+                <span class="stat-icon">🎫</span>
+                <span class="stat-value">{{ stats.tickets }}</span>
+                <span class="stat-label">Toplam Ticket</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-icon">📝</span>
+                <span class="stat-value">{{ stats.applications }}</span>
+                <span class="stat-label">Toplam Başvuru</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-icon">🔴</span>
+                <span class="stat-value">{{ stats.permissions }}</span>
+                <span class="stat-label">Aktif İzin</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-icon">✅</span>
+                <span class="stat-value">{{ stats.approved }}</span>
+                <span class="stat-label">Onaylanan</span>
+            </div>
+        </div>
+
+        <div style="text-align:center; margin-top:30px;">
+            <a href="/login" class="btn btn-gray">🔑 Admin Girişi</a>
+        </div>
+        {% endif %}
+
+        <!-- ==================== LOGIN ==================== -->
+        {% if page == 'login' %}
+        <div style="max-width: 450px; margin: 0 auto;">
+            <div class="card" style="cursor:default; text-align:left;">
+                <h2 style="text-align:center; margin-bottom:20px;">🔐 Admin Girişi</h2>
+                <div id="login-alert"></div>
+                <div class="form-group">
+                    <label>Kullanıcı Adı</label>
+                    <input type="text" id="login-username" placeholder="Kullanıcı adınız">
+                </div>
+                <div class="form-group">
+                    <label>Şifre</label>
+                    <input type="password" id="login-password" placeholder="Şifreniz">
+                </div>
+                <button class="btn btn-blue" onclick="login()" style="width:100%;">Giriş Yap</button>
+                <p style="text-align:center; margin-top:15px; color:var(--text-secondary);">
+                    Hesabın yok mu? <a href="/register" style="color:var(--blue);">Kayıt Ol</a>
+                </p>
+                <p style="text-align:center; margin-top:5px;">
+                    <a href="/" style="color:var(--text-secondary);">← Ana Sayfa</a>
+                </p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ==================== REGISTER ==================== -->
+        {% if page == 'register' %}
+        <div style="max-width: 450px; margin: 0 auto;">
+            <div class="card" style="cursor:default; text-align:left;">
+                <h2 style="text-align:center; margin-bottom:20px;">📝 Admin Kaydı</h2>
+                <div id="register-alert"></div>
+                <div class="form-group">
+                    <label>Kullanıcı Adı</label>
+                    <input type="text" id="reg-username" placeholder="Kullanıcı adınız">
+                </div>
+                <div class="form-group">
+                    <label>Discord ID / Kullanıcı Adı</label>
+                    <input type="text" id="reg-discord" placeholder="Discord ID veya kullanıcı adınız">
+                </div>
+                <div class="form-group">
+                    <label>Şifre</label>
+                    <input type="password" id="reg-password" placeholder="En az 6 karakter">
+                </div>
+                <div class="form-group">
+                    <label>Şifre Tekrar</label>
+                    <input type="password" id="reg-password2" placeholder="Şifrenizi tekrar yazın">
+                </div>
+                <button class="btn btn-blue" onclick="register()" style="width:100%;">Kayıt Ol</button>
+                <div class="alert alert-info" style="margin-top:15px;">
+                    ⚠️ Kaydınız süper admin onayından sonra aktif olacaktır.
+                </div>
+                <p style="text-align:center; margin-top:10px;">
+                    <a href="/login" style="color:var(--blue);">Giriş Yap</a> | 
+                    <a href="/" style="color:var(--text-secondary);">Ana Sayfa</a>
+                </p>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ==================== WAITING ==================== -->
+        {% if page == 'waiting' %}
+        <div style="max-width: 500px; margin: 0 auto; text-align:center;">
+            <div class="card" style="cursor:default;">
+                <span style="font-size:60px;">⏳</span>
+                <h2 style="margin:20px 0;">Onay Bekleniyor</h2>
+                <p style="color:var(--text-secondary);">Hesabınız oluşturuldu! Süper admin onayı bekleniyor.</p>
+                <p style="color:var(--orange); margin-top:10px;">🟡 Durum: Beklemede</p>
+                <div class="alert alert-info" style="margin-top:20px;">
+                    Onaylanınca Discord DM ile bildirileceksiniz.
+                </div>
+                <a href="/" class="btn btn-gray" style="margin-top:20px;">Ana Sayfa</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ==================== 403 ==================== -->
+        {% if page == '403' %}
+        <div style="max-width: 500px; margin: 0 auto; text-align:center;">
+            <div class="card" style="cursor:default;">
+                <span style="font-size:60px;">🚫</span>
+                <h2 style="margin:20px 0;">Erişim Reddedildi</h2>
+                <p style="color:var(--red);">Bu sayfaya erişim yetkiniz yok!</p>
+                <a href="/panel" class="btn btn-blue" style="margin-top:20px;">Panele Dön</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ==================== 404 ==================== -->
+        {% if page == '404' %}
+        <div style="max-width: 500px; margin: 0 auto; text-align:center;">
+            <div class="card" style="cursor:default;">
+                <span style="font-size:60px;">🔍</span>
+                <h2 style="margin:20px 0;">Sayfa Bulunamadı</h2>
+                <p style="color:var(--text-secondary);">Aradığınız sayfa mevcut değil.</p>
+                <a href="/" class="btn btn-blue" style="margin-top:20px;">Ana Sayfa</a>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- ==================== ADMIN PANEL ==================== -->
+        {% if page == 'panel' %}
+        <div class="panel-header">
+            <div>
+                <h2>🛡️ Admin Paneli</h2>
+                <p style="color:var(--text-secondary);">Hoş geldin, <strong>{{ current_user.username }}</strong>!</p>
+            </div>
+            <div class="panel-user">
+                <span class="badge badge-approved">{{ current_user.role }}</span>
+                <a href="/api/logout" class="btn btn-red btn-small">Çıkış Yap</a>
+            </div>
+        </div>
+
+        <div class="panel-tabs">
+            <button class="tab-btn active" onclick="showTab('web-tickets')">🌐 Web Ticketler</button>
+            <button class="tab-btn" onclick="showTab('web-basvuru')">🌐 Web Başvurular</button>
+            <button class="tab-btn" onclick="showTab('web-izin')">🌐 Web İzinler</button>
+            <button class="tab-btn" onclick="showTab('dc-tickets')">🎫 DC Ticketler</button>
+            <button class="tab-btn" onclick="showTab('dc-basvuru')">📝 DC Başvurular</button>
+            <button class="tab-btn" onclick="showTab('dc-izin')">🔴 DC İzinler</button>
+        </div>
+
+        <!-- Web Ticketler -->
+        <div class="tab-content active" id="web-tickets">
+            <h3>🌐 Web Ticketleri</h3>
+            {% if web_tickets %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Kullanıcı</th>
+                            <th>Discord ID</th>
+                            <th>Sorun</th>
+                            <th>Durum</th>
+                            <th>Tarih</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in web_tickets %}
+                        <tr>
+                            <td>#{{ ticket.no }}</td>
+                            <td>{{ ticket.username }}</td>
+                            <td>{{ ticket.discord_id }}</td>
+                            <td>{{ ticket.sorun[:50] }}...</td>
+                            <td>
+                                {% if ticket.durum == 'bekliyor' %}
+                                <span class="badge badge-pending">Bekliyor</span>
+                                {% elif ticket.durum == 'onaylandı' %}
+                                <span class="badge badge-approved">Onaylandı</span>
+                                {% else %}
+                                <span class="badge badge-rejected">Reddedildi</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ ticket.tarih[:10] }}</td>
+                            <td>
+                                {% if ticket.durum == 'bekliyor' %}
+                                <button class="btn btn-green btn-small" onclick="ticketApprove({{ ticket.no }})">✅</button>
+                                <button class="btn btn-red btn-small" onclick="ticketReject({{ ticket.no }})">❌</button>
+                                {% else %}
+                                <small>{{ ticket.alan }}</small>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="color:var(--text-secondary); text-align:center; padding:30px;">Henüz web ticketi yok.</p>
+            {% endif %}
+        </div>
+
+        <!-- Web Başvurular -->
+        <div class="tab-content" id="web-basvuru">
+            <h3>🌐 Web Başvuruları</h3>
+            {% if web_basvurular %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Kullanıcı</th>
+                            <th>Ad</th>
+                            <th>Yaş</th>
+                            <th>Durum</th>
+                            <th>Puan</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for basvuru in web_basvurular %}
+                        <tr>
+                            <td>#{{ basvuru.no }}</td>
+                            <td>{{ basvuru.username }}</td>
+                            <td>{{ basvuru.isim }}</td>
+                            <td>{{ basvuru.yas }}</td>
+                            <td>
+                                {% if basvuru.durum == 'bekliyor' %}
+                                <span class="badge badge-pending">Bekliyor</span>
+                                {% elif basvuru.durum == 'onaylandı' %}
+                                <span class="badge badge-approved">Onaylandı</span>
+                                {% else %}
+                                <span class="badge badge-rejected">Reddedildi</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ basvuru.puan }}/100</td>
+                            <td>
+                                {% if basvuru.durum == 'bekliyor' %}
+                                <button class="btn btn-green btn-small" onclick="basvuruApprove({{ basvuru.no }})">✅</button>
+                                <button class="btn btn-red btn-small" onclick="basvuruReject({{ basvuru.no }})">❌</button>
+                                <button class="btn btn-blue btn-small" onclick="basvuruYorum({{ basvuru.no }})">💬</button>
+                                <button class="btn btn-gold btn-small" onclick="basvuruPuan({{ basvuru.no }})">⭐</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="color:var(--text-secondary); text-align:center; padding:30px;">Henüz web başvurusu yok.</p>
+            {% endif %}
+        </div>
+
+        <!-- Web İzinler -->
+        <div class="tab-content" id="web-izin">
+            <h3>🌐 Web İzinleri</h3>
+            {% if web_izinler %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Kullanıcı</th>
+                            <th>Sebep</th>
+                            <th>Süre</th>
+                            <th>Durum</th>
+                            <th>İşlem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for izin in web_izinler %}
+                        <tr>
+                            <td>#{{ izin.no }}</td>
+                            <td>{{ izin.username }}</td>
+                            <td>{{ izin.sebep[:30] }}</td>
+                            <td>{{ izin.sure_str }}</td>
+                            <td>
+                                {% if izin.durum == 'bekliyor' %}
+                                <span class="badge badge-pending">Bekliyor</span>
+                                {% elif izin.durum == 'onaylandı' %}
+                                <span class="badge badge-approved">Onaylandı</span>
+                                {% else %}
+                                <span class="badge badge-rejected">Reddedildi</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if izin.durum == 'bekliyor' %}
+                                <button class="btn btn-green btn-small" onclick="izinApprove({{ izin.no }})">✅</button>
+                                <button class="btn btn-red btn-small" onclick="izinReject({{ izin.no }})">❌</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="color:var(--text-secondary); text-align:center; padding:30px;">Henüz web izin talebi yok.</p>
+            {% endif %}
+        </div>
+
+        <!-- Discord Ticketler -->
+        <div class="tab-content" id="dc-tickets">
+            <h3>🎫 Discord Ticketleri</h3>
+            {% if discord_tickets %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Sahip</th>
+                            <th>Alan</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in discord_tickets %}
+                        <tr>
+                            <td>{{ ticket.id }}</td>
+                            <td>{{ ticket.sahip }}</td>
+                            <td>{{ ticket.alan }}</td>
+                            <td><span class="badge {% if ticket.durum == 'açık' %}badge-pending{% else %}badge-approved{% endif %}">{{ ticket.durum }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="color:var(--text-secondary); text-align:center; padding:30px;">Aktif Discord ticketi yok.</p>
+            {% endif %}
+        </div>
+
+        <!-- Discord Başvurular -->
+        <div class="tab-content" id="dc-basvuru">
+            <h3>📝 Discord Başvuruları</h3>
+            {% if discord_basvurular %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>İsim</th>
+                            <th>Yaş</th>
+                            <th>Durum</th>
+                            <th>Tarih</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for basvuru in discord_basvurular %}
+                        <tr>
+                            <td>#{{ basvuru.no }}</td>
+                            <td>{{ basvuru.isim }}</td>
+                            <td>{{ basvuru.yas }}</td>
+                            <td>
+                                {% if basvuru.durum == 'bekliyor' %}
+                                <span class="badge badge-pending">Bekliyor</span>
+                                {% elif basvuru.durum == 'onaylandı' %}
+                                <span class="badge badge-approved">Onaylandı</span>
+                                {% else %}
+                                <span class="badge badge-rejected">Reddedildi</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ basvuru.tarih[:10] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="color:var(--text-secondary); text-align:center; padding:30px;">Henüz başvuru yok.</p>
+            {% endif %}
+        </div>
+
+        <!-- Discord İzinler -->
+        <div class="tab-content" id="dc-izin">
+            <h3>🔴 Discord İzinleri</h3>
+            {% if discord_izinler %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Kullanıcı</th>
+                            <th>Süre</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for izin in discord_izinler %}
+                        <tr>
+                            <td>#{{ izin.no }}</td>
+                            <td>{{ izin.kullanici_adi }}</td>
+                            <td>{{ izin.sure_str }}</td>
+                            <td>
+                                {% if izin.durum == 'onaylandı' %}
+                                <span class="badge badge-approved">Aktif</span>
+                                {% elif izin.durum == 'bekliyor' %}
+                                <span class="badge badge-pending">Bekliyor</span>
+                                {% elif izin.durum == 'süre_doldu' %}
+                                <span class="badge badge-expired">Süre Doldu</span>
+                                {% else %}
+                                <span class="badge badge-rejected">{{ izin.durum }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p style="color:var(--text-secondary); text-align:center; padding:30px;">Henüz izin kaydı yok.</p>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- ==================== SÜPER ADMIN ==================== -->
+        {% if page == 'super_admin' %}
+        <div class="panel-header">
+            <div>
+                <h2>👑 Süper Admin Paneli</h2>
+                <p style="color:var(--gold);">Admin Onay Yönetimi</p>
+            </div>
+            <a href="/api/logout" class="btn btn-red btn-small">Çıkış Yap</a>
+        </div>
+
+        <h3>⏳ Bekleyen Admin Kayıtları ({{ pending|length }})</h3>
+        {% if pending %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Kullanıcı Adı</th>
+                        <th>Discord ID</th>
+                        <th>Tarih</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in pending %}
+                    <tr>
+                        <td><strong>{{ p.username }}</strong></td>
+                        <td>{{ p.discord_id }}</td>
+                        <td>{{ p.created_at[:10] }}</td>
+                        <td>
+                            <button class="btn btn-green btn-small" onclick="approveAdmin('{{ p.id }}')">✅ Onayla</button>
+                            <button class="btn btn-red btn-small" onclick="rejectAdmin('{{ p.id }}')">❌ Reddet</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color:var(--text-secondary); text-align:center; padding:30px;">Bekleyen kayıt yok.</p>
+        {% endif %}
+
+        <h3 style="margin-top:40px;">✅ Onaylı Adminler ({{ admins|length }})</h3>
+        {% if admins %}
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Kullanıcı Adı</th>
+                        <th>Discord ID</th>
+                        <th>Rol</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for admin in admins %}
+                    <tr>
+                        <td><strong>{{ admin.username }}</strong></td>
+                        <td>{{ admin.discord_id }}</td>
+                        <td><span class="badge badge-approved">{{ admin.role }}</span></td>
+                        <td>
+                            <button class="btn btn-red btn-small" onclick="deleteAdmin('{{ admin.id }}')">🗑️ Sil</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="color:var(--text-secondary); text-align:center; padding:30px;">Henüz onaylı admin yok.</p>
+        {% endif %}
+
+        <div style="text-align:center; margin-top:30px;">
+            <a href="/panel" class="btn btn-blue">📊 Panele Git</a>
+        </div>
+        {% endif %}
+
+        <!-- ==================== FOOTER ==================== -->
+        <footer class="footer">
+            <p>© 2024 Kross Sentinel • Tüm hakları saklıdır.</p>
+        </footer>
+    </div>
+
+    <!-- ==================== MODALLAR ==================== -->
+    
+    <!-- Ticket Modal -->
+    <div class="modal" id="ticket-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📩 Destek Talebi</h2>
+                <button class="modal-close" onclick="closeModal('ticket-modal')">&times;</button>
+            </div>
+            <div id="ticket-alert"></div>
+            <div class="form-group">
+                <label>Discord ID / Kullanıcı Adı</label>
+                <input type="text" id="ticket-discord" placeholder="Discord ID veya kullanıcı adınız">
+            </div>
+            <div class="form-group">
+                <label>Discord Kullanıcı Adınız</label>
+                <input type="text" id="ticket-username" placeholder="Discord'daki adınız">
+            </div>
+            <div class="form-group">
+                <label>Sorununuz / Talebiniz</label>
+                <textarea id="ticket-sorun" placeholder="Sorununuzu detaylıca yazın..."></textarea>
+            </div>
+            <button class="btn btn-green" onclick="submitTicket()" style="width:100%;">📩 Gönder</button>
+        </div>
+    </div>
+
+    <!-- Başvuru Modal -->
+    <div class="modal" id="apply-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📝 Yetkili Başvurusu</h2>
+                <button class="modal-close" onclick="closeModal('apply-modal')">&times;</button>
+            </div>
+            <div id="apply-alert"></div>
+            <div class="form-group">
+                <label>Discord ID / Kullanıcı Adı</label>
+                <input type="text" id="apply-discord" placeholder="Discord ID veya kullanıcı adınız">
+            </div>
+            <div class="form-group">
+                <label>Discord Kullanıcı Adınız</label>
+                <input type="text" id="apply-username" placeholder="Discord'daki adınız">
+            </div>
+            <div class="form-group">
+                <label>Gerçek Adınız</label>
+                <input type="text" id="apply-isim" placeholder="Adınız">
+            </div>
+            <div class="form-group">
+                <label>Yaşınız</label>
+                <input type="number" id="apply-yas" placeholder="18" min="13" max="99">
+            </div>
+            <div class="form-group">
+                <label>Tecrübeniz</label>
+                <textarea id="apply-tecrube" placeholder="Daha önce yetkili oldunuz mu? Hangi sunucularda?"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Neden Yetkili Olmak İstiyorsunuz?</label>
+                <textarea id="apply-neden" placeholder="Kendinizi ve hedeflerinizi anlatın..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Günde Kaç Saat Aktifsiniz?</label>
+                <input type="text" id="apply-sure" placeholder="Örn: 5-6 saat">
+            </div>
+            <button class="btn btn-blue" onclick="submitBasvuru()" style="width:100%;">📝 Başvuruyu Gönder</button>
+        </div>
+    </div>
+
+    <!-- İzin Modal -->
+    <div class="modal" id="permission-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔴 İzin Talebi</h2>
+                <button class="modal-close" onclick="closeModal('permission-modal')">&times;</button>
+            </div>
+            <div id="permission-alert"></div>
+            <div class="form-group">
+                <label>Discord ID / Kullanıcı Adı</label>
+                <input type="text" id="perm-discord" placeholder="Discord ID veya kullanıcı adınız">
+            </div>
+            <div class="form-group">
+                <label>Discord Kullanıcı Adınız</label>
+                <input type="text" id="perm-username" placeholder="Discord'daki adınız">
+            </div>
+            <div class="form-group">
+                <label>İzin Sebebi</label>
+                <textarea id="perm-sebep" placeholder="Neden izin almak istiyorsunuz?"></textarea>
+            </div>
+            <div class="form-group">
+                <label>İzin Süresi</label>
+                <select id="perm-sure">
+                    <option value="">Süre Seçin</option>
+                    <option value="30m">30 Dakika</option>
+                    <option value="1h">1 Saat</option>
+                    <option value="3h">3 Saat</option>
+                    <option value="6h">6 Saat</option>
+                    <option value="12h">12 Saat</option>
+                    <option value="24h">1 Gün</option>
+                    <option value="3d">3 Gün</option>
+                    <option value="7d">7 Gün</option>
+                </select>
+            </div>
+            <button class="btn btn-red" onclick="submitIzin()" style="width:100%;">🔴 İzin Talep Et</button>
+        </div>
+    </div>
+
+    <!-- Yorum Modal -->
+    <div class="modal" id="yorum-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>💬 Yorum Ekle</h2>
+                <button class="modal-close" onclick="closeModal('yorum-modal')">&times;</button>
+            </div>
+            <input type="hidden" id="yorum-basvuru-no">
+            <div class="form-group">
+                <label>Yorumunuz</label>
+                <textarea id="yorum-text" placeholder="Başvuru hakkında yorumunuz..."></textarea>
+            </div>
+            <button class="btn btn-blue" onclick="submitYorum()" style="width:100%;">💬 Gönder</button>
+        </div>
+    </div>
+
+    <!-- Puan Modal -->
+    <div class="modal" id="puan-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⭐ Puan Ver</h2>
+                <button class="modal-close" onclick="closeModal('puan-modal')">&times;</button>
+            </div>
+            <input type="hidden" id="puan-basvuru-no">
+            <div class="form-group">
+                <label>Puan (0-100)</label>
+                <input type="number" id="puan-value" placeholder="85" min="0" max="100">
+            </div>
+            <button class="btn btn-gold" onclick="submitPuan()" style="width:100%;">⭐ Kaydet</button>
+        </div>
+    </div>
+
+    <!-- ==================== JAVASCRIPT ==================== -->
+    <script>
+        // Modal işlemleri
+        function openModal(id) {
+            document.getElementById(id).classList.add('active');
+        }
+        
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+        
+        // Modal dışına tıklayınca kapat
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('active');
+            }
+        });
+
+        // Tab sistemi
+        function showTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Login
+        function login() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            fetch('/api/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, password})
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = data.redirect;
+                } else {
+                    document.getElementById('login-alert').innerHTML = 
+                        '<div class="alert alert-error">' + data.error + '</div>';
+                }
+            });
+        }
+
+        // Register
+        function register() {
+            const username = document.getElementById('reg-username').value;
+            const discord_id = document.getElementById('reg-discord').value;
+            const password = document.getElementById('reg-password').value;
+            const password2 = document.getElementById('reg-password2').value;
+            
+            if (password !== password2) {
+                return document.getElementById('register-alert').innerHTML = 
+                    '<div class="alert alert-error">Şifreler eşleşmiyor!</div>';
+            }
+            
+            fetch('/api/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({username, discord_id, password})
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/waiting';
+                } else {
+                    document.getElementById('register-alert').innerHTML = 
+                        '<div class="alert alert-error">' + data.error + '</div>';
+                }
+            });
+        }
+
+        // Ticket Gönder
+        function submitTicket() {
+            const discord_id = document.getElementById('ticket-discord').value;
+            const username = document.getElementById('ticket-username').value;
+            const sorun = document.getElementById('ticket-sorun').value;
+            
+            fetch('/api/ticket/create', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({discord_id, username, sorun})
+            })
+            .then(r => r.json())
+            .then(data => {
+                const alertEl = document.getElementById('ticket-alert');
+                if (data.success) {
+                    alertEl.innerHTML = '<div class="alert alert-success">✅ Talep #' + data.ticket_no + ' oluşturuldu!</div>';
+                    setTimeout(() => closeModal('ticket-modal'), 1500);
+                } else {
+                    alertEl.innerHTML = '<div class="alert alert-error">' + data.error + '</div>';
+                }
+            });
+        }
+
+        // Başvuru Gönder
+        function submitBasvuru() {
+            const data = {
+                discord_id: document.getElementById('apply-discord').value,
+                username: document.getElementById('apply-username').value,
+                isim: document.getElementById('apply-isim').value,
+                yas: document.getElementById('apply-yas').value,
+                tecrube: document.getElementById('apply-tecrube').value,
+                neden: document.getElementById('apply-neden').value,
+                sure: document.getElementById('apply-sure').value
+            };
+            
+            fetch('/api/basvuru/create', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            })
+            .then(r => r.json())
+            .then(data => {
+                const alertEl = document.getElementById('apply-alert');
+                if (data.success) {
+                    alertEl.innerHTML = '<div class="alert alert-success">✅ Başvuru #' + data.basvuru_no + ' oluşturuldu!</div>';
+                    setTimeout(() => closeModal('apply-modal'), 1500);
+                } else {
+                    alertEl.innerHTML = '<div class="alert alert-error">' + data.error + '</div>';
+                }
+            });
+        }
+
+        // İzin Gönder
+        function submitIzin() {
+            const data = {
+                discord_id: document.getElementById('perm-discord').value,
+                username: document.getElementById('perm-username').value,
+                sebep: document.getElementById('perm-sebep').value,
+                sure: document.getElementById('perm-sure').value
+            };
+            
+            fetch('/api/izin/create', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            })
+            .then(r => r.json())
+            .then(data => {
+                const alertEl = document.getElementById('permission-alert');
+                if (data.success) {
+                    alertEl.innerHTML = '<div class="alert alert-success">✅ İzin talebi #' + data.izin_no + ' oluşturuldu!</div>';
+                    setTimeout(() => closeModal('permission-modal'), 1500);
+                } else {
+                    alertEl.innerHTML = '<div class="alert alert-error">' + data.error + '</div>';
+                }
+            });
+        }
+
+        // Ticket Onay/Red
+        function ticketApprove(no) {
+            fetch('/api/ticket/approve', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ticket_no: no})
+            }).then(() => location.reload());
+        }
+
+        function ticketReject(no) {
+            fetch('/api/ticket/reject', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ticket_no: no})
+            }).then(() => location.reload());
+        }
+
+        // Başvuru Onay/Red
+        function basvuruApprove(no) {
+            fetch('/api/basvuru/approve', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({basvuru_no: no})
+            }).then(() => location.reload());
+        }
+
+        function basvuruReject(no) {
+            fetch('/api/basvuru/reject', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({basvuru_no: no})
+            }).then(() => location.reload());
+        }
+
+        function basvuruYorum(no) {
+            document.getElementById('yorum-basvuru-no').value = no;
+            openModal('yorum-modal');
+        }
+
+        function basvuruPuan(no) {
+            document.getElementById('puan-basvuru-no').value = no;
+            openModal('puan-modal');
+        }
+
+        function submitYorum() {
+            const basvuru_no = document.getElementById('yorum-basvuru-no').value;
+            const yorum = document.getElementById('yorum-text').value;
+            
+            fetch('/api/basvuru/yorum', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({basvuru_no: parseInt(basvuru_no), yorum})
+            }).then(() => {
+                closeModal('yorum-modal');
+                location.reload();
+            });
+        }
+
+        function submitPuan() {
+            const basvuru_no = document.getElementById('puan-basvuru-no').value;
+            const puan = document.getElementById('puan-value').value;
+            
+            fetch('/api/basvuru/puan', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({basvuru_no: parseInt(basvuru_no), puan: parseInt(puan)})
+            }).then(() => {
+                closeModal('puan-modal');
+                location.reload();
+            });
+        }
+
+        // İzin Onay/Red
+        function izinApprove(no) {
+            fetch('/api/izin/approve', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({izin_no: no})
+            }).then(() => location.reload());
+        }
+
+        function izinReject(no) {
+            fetch('/api/izin/reject', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({izin_no: no})
+            }).then(() => location.reload());
+        }
+
+        // Süper Admin
+        function approveAdmin(id) {
+            fetch('/api/super/approve', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({admin_id: id})
+            }).then(() => location.reload());
+        }
+
+        function rejectAdmin(id) {
+            fetch('/api/super/reject', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({admin_id: id})
+            }).then(() => location.reload());
+        }
+
+        function deleteAdmin(id) {
+            if (confirm('Bu admini silmek istediğinize emin misiniz?')) {
+                fetch('/api/super/delete', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({admin_id: id})
+                }).then(() => location.reload());
+            }
+        }
+
+        // Enter ile login
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                if (document.getElementById('login-username')) {
+                    login();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
